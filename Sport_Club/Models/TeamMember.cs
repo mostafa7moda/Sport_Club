@@ -1,9 +1,7 @@
 ﻿namespace Sport_Club.Models
 {
-    public class TeamMember
+    public class TeamMember : BaseModel
     {
-        public int TeamMemberId { get; set; }
-
         public int TeamId { get; set; }
         public Team Team { get; set; }
 

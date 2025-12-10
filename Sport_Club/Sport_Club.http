@@ -1,6 +1,0 @@
-@Sport_Club_HostAddress = http://localhost:5011
-
-GET {{Sport_Club_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

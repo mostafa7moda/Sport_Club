@@ -12,8 +12,8 @@ using Sport_Club.Data;
 namespace Sport_Club.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251129024728_Init3")]
-    partial class Init3
+    [Migration("20251209134748_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,12 +178,10 @@ namespace Sport_Club.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Gender")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -233,14 +231,23 @@ namespace Sport_Club.Migrations
 
             modelBuilder.Entity("Sport_Club.Models.Attendance", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -250,157 +257,83 @@ namespace Sport_Club.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("SectionId");
 
                     b.HasIndex("MemberId", "SectionId", "Date")
-                        .HasDatabaseName("IX_Attendance_Member_Section_Date");
+                        .IsUnique();
 
-                    b.ToTable("Attendance");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Competition", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("SectionId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SectionId", "StartDate")
-                        .HasDatabaseName("IX_Competition_Section_StartDate");
-
-                    b.ToTable("Competitions");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.CompetitionResult", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CompetitionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("CompetitionId", "MemberId")
-                        .HasDatabaseName("IX_CompetitionResult_Competition_Member");
-
-                    b.ToTable("CompetitionResults");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Department", b =>
-                {
-                    b.Property<int>("DepartmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DepartmentId"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("ManagerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("DepartmentId");
-
-                    b.HasIndex("ManagerId");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("IX_Department_Name");
-
-                    b.ToTable("Departments");
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Member", b =>
                 {
-                    b.Property<int>("MemberId")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MemberId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EmergencyPhone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("HealthNotes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("JoinDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("MemberId");
+                    b.HasKey("ID");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Member_User");
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Members");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.MemberSection", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -413,131 +346,163 @@ namespace Sport_Club.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("SectionId");
 
                     b.HasIndex("MemberId", "SectionId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_MemberSection_Member_Section");
+                        .IsUnique();
 
                     b.ToTable("MemberSections");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Section", b =>
                 {
-                    b.Property<int>("SectionId")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SectionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ManagerId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Shift")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SectionId");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("ManagerId");
-
-                    b.HasIndex("DepartmentId", "Name")
-                        .HasDatabaseName("IX_Section_Department_Name");
 
                     b.ToTable("Sections");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Subscription", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MemberSectionId")
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("Price")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("MemberSectionId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Subscription_MemberSection");
+                        .IsUnique();
 
                     b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Team", b =>
                 {
-                    b.Property<int>("TeamId")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<int?>("CoachId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("TeamName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("TeamId");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("CoachId");
-
-                    b.HasIndex("DepartmentId", "TeamName")
-                        .HasDatabaseName("IX_Team_Department_Name");
 
                     b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.TeamMember", b =>
                 {
-                    b.Property<int>("TeamMemberId")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamMemberId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("JoinDate")
                         .HasColumnType("datetime2");
@@ -548,47 +513,61 @@ namespace Sport_Club.Migrations
                     b.Property<int>("TeamId")
                         .HasColumnType("int");
 
-                    b.HasKey("TeamMemberId");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("MemberId");
 
                     b.HasIndex("TeamId", "MemberId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_TeamMember_Team_Member");
+                        .IsUnique();
 
                     b.ToTable("TeamMembers");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Trainer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ExperienceYears")
+                        .HasColumnType("int");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SectionId")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("SectionId")
                         .HasColumnType("int");
 
                     b.Property<string>("Shift")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.HasIndex("SectionId");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Trainer_User");
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Trainers");
                 });
@@ -647,67 +626,27 @@ namespace Sport_Club.Migrations
             modelBuilder.Entity("Sport_Club.Models.Attendance", b =>
                 {
                     b.HasOne("Sport_Club.Models.Member", "Member")
-                        .WithMany("Attendance")
+                        .WithMany("Attendances")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Sport_Club.Models.Section", "Section")
-                        .WithMany("Attendance")
+                        .WithMany("Attendances")
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Member");
 
                     b.Navigation("Section");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Competition", b =>
-                {
-                    b.HasOne("Sport_Club.Models.Section", "Section")
-                        .WithMany("Competitions")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Section");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.CompetitionResult", b =>
-                {
-                    b.HasOne("Sport_Club.Models.Competition", "Competition")
-                        .WithMany("Results")
-                        .HasForeignKey("CompetitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Sport_Club.Models.Member", "Member")
-                        .WithMany("CompetitionResults")
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Competition");
-
-                    b.Navigation("Member");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Department", b =>
-                {
-                    b.HasOne("Sport_Club.Models.ApplicationUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manager");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Member", b =>
                 {
                     b.HasOne("Sport_Club.Models.ApplicationUser", "User")
-                        .WithMany("Members")
-                        .HasForeignKey("UserId")
+                        .WithOne("Member")
+                        .HasForeignKey("Sport_Club.Models.Member", "UserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
@@ -724,7 +663,7 @@ namespace Sport_Club.Migrations
                     b.HasOne("Sport_Club.Models.Section", "Section")
                         .WithMany("MemberSections")
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Member");
@@ -734,18 +673,10 @@ namespace Sport_Club.Migrations
 
             modelBuilder.Entity("Sport_Club.Models.Section", b =>
                 {
-                    b.HasOne("Sport_Club.Models.Department", "Department")
-                        .WithMany("Sections")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Sport_Club.Models.ApplicationUser", "Manager")
                         .WithMany()
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Department");
 
                     b.Navigation("Manager");
                 });
@@ -768,15 +699,7 @@ namespace Sport_Club.Migrations
                         .HasForeignKey("CoachId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Sport_Club.Models.Department", "Department")
-                        .WithMany("Teams")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Coach");
-
-                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.TeamMember", b =>
@@ -803,12 +726,11 @@ namespace Sport_Club.Migrations
                     b.HasOne("Sport_Club.Models.Section", "Section")
                         .WithMany("Trainers")
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Sport_Club.Models.ApplicationUser", "User")
-                        .WithMany("Trainers")
-                        .HasForeignKey("UserId")
+                        .WithOne("Trainer")
+                        .HasForeignKey("Sport_Club.Models.Trainer", "UserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Section");
@@ -818,28 +740,14 @@ namespace Sport_Club.Migrations
 
             modelBuilder.Entity("Sport_Club.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("Members");
+                    b.Navigation("Member");
 
-                    b.Navigation("Trainers");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Competition", b =>
-                {
-                    b.Navigation("Results");
-                });
-
-            modelBuilder.Entity("Sport_Club.Models.Department", b =>
-                {
-                    b.Navigation("Sections");
-
-                    b.Navigation("Teams");
+                    b.Navigation("Trainer");
                 });
 
             modelBuilder.Entity("Sport_Club.Models.Member", b =>
                 {
-                    b.Navigation("Attendance");
-
-                    b.Navigation("CompetitionResults");
+                    b.Navigation("Attendances");
 
                     b.Navigation("MemberSections");
 
@@ -853,9 +761,7 @@ namespace Sport_Club.Migrations
 
             modelBuilder.Entity("Sport_Club.Models.Section", b =>
                 {
-                    b.Navigation("Attendance");
-
-                    b.Navigation("Competitions");
+                    b.Navigation("Attendances");
 
                     b.Navigation("MemberSections");
 

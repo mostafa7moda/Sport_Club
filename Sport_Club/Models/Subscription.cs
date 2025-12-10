@@ -1,9 +1,7 @@
 ﻿namespace Sport_Club.Models
 {
-    public class Subscription
+    public class Subscription : BaseModel
     {
-        public int Id { get; set; }
-
         public int MemberSectionId { get; set; }
         public MemberSection MemberSection { get; set; }
 

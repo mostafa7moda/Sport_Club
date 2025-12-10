@@ -6,7 +6,10 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Sport_Club.Data;
-    global using Sport_Club.Models;
+global using Sport_Club.Models;
+
+
+
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.DependencyInjection;
 

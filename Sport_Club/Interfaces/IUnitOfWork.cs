@@ -1,11 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using Sport_Club.Interfaces;
+
 
 namespace Sport_Club.Interfaces
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
         ITrainerRepository Trainers { get; }
+        IMemberRepository Members { get; }
 
-        Task<int> SaveAsync();
+        Task BeginTransactionAsync();
+        Task CommitAsync();
+        Task RollbackAsync();
+
+        Task<int> SaveChangesAsync();
     }
 }
+

@@ -1,9 +1,7 @@
 ﻿namespace Sport_Club.Models
 {
-    public class Attendance
+    public class Attendance : BaseModel
     {
-        public int Id { get; set; }
-
         public int MemberId { get; set; }
         public Member Member { get; set; }
 

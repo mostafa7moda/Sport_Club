@@ -1,9 +1,13 @@
-﻿using Sport_Club.Models;
+﻿// ITrainerRepository.cs
+using Sport_Club.Models;
+using System.Threading.Tasks;
 
 namespace Sport_Club.Interfaces
 {
-    public interface ITrainerRepository : IGenericRepository<Trainer>
+    public interface ITrainerRepository
     {
-        Task<IEnumerable<Trainer>> GetTopExperiencedAsync(int years);
+        Task AddAsync(Trainer trainer);
+        // أضف هنا أي طرق أخرى تحتاجها
     }
 }
+

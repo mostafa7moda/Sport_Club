@@ -1,20 +1,55 @@
-﻿using Sport_Club.Data;
+﻿// UnitOfWork.cs
+using Microsoft.EntityFrameworkCore.Storage;
+using Sport_Club.Data;
 using Sport_Club.Interfaces;
+using System.Threading.Tasks;
 
-namespace Sport_Club.Repositories
+public class UnitOfWork : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    private readonly AppDbContext _context;
+    private IDbContextTransaction _transaction;
+    public ITrainerRepository Trainers { get; }
+    public IMemberRepository Members { get; }
+
+    public UnitOfWork(AppDbContext context, ITrainerRepository trainerRepo, IMemberRepository memberRepo)
     {
-        private readonly AppDbContext _context;
-        public ITrainerRepository Trainers { get; }
+        _context = context;
+        Trainers = trainerRepo;
+        Members = memberRepo;
+    }
 
-        public UnitOfWork(AppDbContext context, ITrainerRepository trainerRepository)
+    public async Task BeginTransactionAsync()
+    {
+        _transaction = await _context.Database.BeginTransactionAsync();
+    }
+
+    public async Task CommitAsync()
+    {
+        if (_transaction != null)
         {
-            _context = context;
-            Trainers = trainerRepository;
+            await _transaction.CommitAsync();
+            await _transaction.DisposeAsync();
+            _transaction = null;
         }
+    }
 
-        public async Task<int> SaveAsync()
-            => await _context.SaveChangesAsync();
+    public async Task RollbackAsync()
+    {
+        if (_transaction != null)
+        {
+            await _transaction.RollbackAsync();
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
     }
 }
