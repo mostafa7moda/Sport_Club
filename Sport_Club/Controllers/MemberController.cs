@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Sport_Club.DTOs;
 using Sport_Club.Interfaces;
-using Sport_Club.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Sport_Club.Controllers
 {
@@ -11,104 +13,76 @@ namespace Sport_Club.Controllers
     [Authorize(Roles = "Admin,Member")]
     public class MemberController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemberService _memberService;
 
-        public MemberController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+        public MemberController(IMemberService memberService)
         {
-            _unitOfWork = unitOfWork;
-            _userManager = userManager;
+            _memberService = memberService;
         }
 
         // GET ALL MEMBERS
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var members = await _unitOfWork.Members.GetAllAsync();
-
-            var result = members.Select(m => new MemberResponseDto
-            {
-                Id = m.UserId.ToString(),
-                FullName = m.User?.FullName,
-                EmergencyPhone = m.EmergencyPhone,
-                HealthNotes = m.HealthNotes,
-                JoinDate = m.JoinDate
-            });
-
-            return Ok(result);
+            var members = await _memberService.GetAllAsync();
+            return Ok(members);
         }
 
         // GET MEMBER BY ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var member = await _unitOfWork.Members.GetByIdAsync(id);
+            var member = await _memberService.GetByIdAsync(id);
             if (member == null) return NotFound();
-
-            var dto = new MemberResponseDto
-            {
-                Id = member.UserId.ToString(),
-                FullName = member.User?.FullName,
-                EmergencyPhone = member.EmergencyPhone,
-                HealthNotes = member.HealthNotes,
-                JoinDate = member.JoinDate
-            };
-
-            return Ok(dto);
+            return Ok(member);
         }
 
         // CREATE MEMBER (Admin)
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(MemberDto dto)
+        public async Task<IActionResult> Create(MemberCreateDto dto)
         {
-            var user = await _userManager.FindByIdAsync(dto.UserId);
-            if (user == null) return BadRequest("User not found");
-
-            var member = new Member
+            try
             {
-                UserId = user.Id,
-                JoinDate = dto.JoinDate,
-                EmergencyPhone = dto.EmergencyPhone,
-                HealthNotes = dto.HealthNotes
-            };
-
-            await _unitOfWork.Members.AddAsync(member);
-            await _unitOfWork.SaveChangesAsync();
-
-            return Ok(new { message = "Member created successfully" });
+                var createdMember = await _memberService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = createdMember.Id }, createdMember);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // UPDATE MEMBER
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, MemberDto dto)
+        public async Task<IActionResult> Update(int id, MemberUpdateDto dto)
         {
-            var member = await _unitOfWork.Members.GetByIdAsync(id);
-            if (member == null) return NotFound();
-
-            member.EmergencyPhone = dto.EmergencyPhone;
-            member.HealthNotes = dto.HealthNotes;
-            member.JoinDate = dto.JoinDate;
-
-            _unitOfWork.Members.Update(member);
-            await _unitOfWork.SaveChangesAsync();
-
-            return Ok(new { message = "Member updated successfully" });
+            try
+            {
+                await _memberService.UpdateAsync(id, dto);
+                return Ok(new { message = "Member updated successfully" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         // DELETE MEMBER
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]        
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var member = await _unitOfWork.Members.GetByIdAsync(id);
-            if (member == null) return NotFound();
-
-            _unitOfWork.Members.Delete(member);
-            await _unitOfWork.SaveChangesAsync();
-
-            return Ok(new { message = "Member deleted successfully" });
+            try
+            {
+                await _memberService.DeleteAsync(id);
+                return NoContent(); // 204 No Content for successful delete
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

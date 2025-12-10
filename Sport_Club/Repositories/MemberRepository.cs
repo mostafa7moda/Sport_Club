@@ -25,13 +25,23 @@ namespace Sport_Club.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Member> GetByIdAsync(int id)
+        public async Task<Member?> GetByIdAsync(int id)
         {
             return await _context.Members
                 .Include(m => m.User)
                 .Include(m => m.MemberSections)
                 .Include(m => m.TeamMembers)
                 .FirstOrDefaultAsync(m => m.ID == id);
+        }
+
+        public async Task<bool> ExistsByUserIdAsync(string userId)
+        {
+            return await _context.Members.AnyAsync(m => m.UserId == userId);
+        }
+
+        public async Task<bool> ExistsByUserIdAsync(string userId, int excludeMemberId)
+        {
+            return await _context.Members.AnyAsync(m => m.UserId == userId && m.ID != excludeMemberId);
         }
 
         public async Task AddAsync(Member member)

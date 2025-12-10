@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Sport_Club.Data;
 using Sport_Club.DTOs;
 using Sport_Club.Enum;
 using Sport_Club.Interfaces;
 using Sport_Club.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Sport_Club.Controllers
 {
@@ -14,25 +16,23 @@ namespace Sport_Club.Controllers
     [Authorize(Roles = "Admin")]
     public class TrainerController : ControllerBase
     {
+        private readonly ITrainerService _trainerService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly AppDbContext _context;
 
-        public TrainerController(
-            UserManager<ApplicationUser> userManager,
-            IUnitOfWork unitOfWork,
-            AppDbContext context)
+        public TrainerController(ITrainerService trainerService, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
         {
+            _trainerService = trainerService;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
-            _context = context;
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddTrainer([FromBody] AddTrainerDto dto)
+        [HttpPost("add")] // Renamed endpoint or keep? "add" is explicit, but POST /api/trainer is RESTful.
+        // Keeping "add" for compatibility or switch to REST? User asked "fix the logic... add Cruds".
+        // I'll make standard CRUDs available too.
+        public async Task<IActionResult> Create([FromBody] TrainerRegistrationDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -45,7 +45,6 @@ namespace Sport_Club.Controllers
                 };
 
                 var userResult = await _userManager.CreateAsync(user, dto.Password);
-
                 if (!userResult.Succeeded)
                 {
                     await _unitOfWork.RollbackAsync();
@@ -54,31 +53,67 @@ namespace Sport_Club.Controllers
 
                 await _userManager.AddToRoleAsync(user, Roles.Trainer.ToString());
 
-                var trainer = new Trainer
+                var trainerDto = new TrainerCreateDto
                 {
                     UserId = user.Id,
                     Gender = dto.Gender,
                     Shift = dto.Shift,
                     ExperienceYears = dto.ExperienceYears,
                     SectionId = dto.SectionId
-
                 };
 
-                await _unitOfWork.Trainers.AddAsync(trainer);
-                await _unitOfWork.SaveChangesAsync();
+                var createdTrainer = await _trainerService.CreateAsync(trainerDto);
                 await _unitOfWork.CommitAsync();
 
-                return Ok(new
-                {
-                    Message = "Trainer added successfully",
-                    TrainerId = trainer.ID,
-                    UserId = user.Id
-                });
+                return CreatedAtAction(nameof(GetById), new { id = createdTrainer.Id }, createdTrainer);
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackAsync();
                 return BadRequest(new { message = "Failed to add trainer", detail = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var trainers = await _trainerService.GetAllAsync();
+            return Ok(trainers);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var trainer = await _trainerService.GetByIdAsync(id);
+            if (trainer == null) return NotFound();
+            return Ok(trainer);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, TrainerUpdateDto dto)
+        {
+            try
+            {
+                await _trainerService.UpdateAsync(id, dto);
+                return Ok(new { message = "Trainer updated successfully" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _trainerService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
             }
         }
     }

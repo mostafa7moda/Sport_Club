@@ -9,6 +9,7 @@ using Sport_Club.Interfaces;
 using Sport_Club.Models;
 using Sport_Club.Repositories;
 using Sport_Club.SeedAdmin;
+using Sport_Club.Services;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -57,7 +58,15 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Repositories Registration
 builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
+builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionService, SectionService>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Connection String

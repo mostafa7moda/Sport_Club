@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Sport_Club.DTOs;
 using Sport_Club.Enum;
 using Sport_Club.Interfaces;
+using Sport_Club.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,15 +18,18 @@ namespace Sport_Club.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMemberService _memberService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             IConfiguration config,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IMemberService memberService)
         {
             _userManager = userManager;
             _config = config;
             _unitOfWork = unitOfWork;
+            _memberService = memberService;
         }
 
         // REGISTER (MEMBER ONLY)
@@ -53,19 +58,13 @@ namespace Sport_Club.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                // Ensure role exists (seed should already do this)
                 if (!await _userManager.IsInRoleAsync(user, Roles.Member.ToString()))
                 {
                     await _userManager.AddToRoleAsync(user, Roles.Member.ToString());
                 }
-                else
-                {
-                    // still ensure the role assignment (safe)
-                    await _userManager.AddToRoleAsync(user, Roles.Member.ToString());
-                }
 
                 // Create Member profile
-                var member = new Member
+                var memberDto = new MemberCreateDto
                 {
                     UserId = user.Id,
                     JoinDate = DateTime.UtcNow,
@@ -73,8 +72,8 @@ namespace Sport_Club.Controllers
                     HealthNotes = dto.HealthNotes
                 };
 
-                await _unitOfWork.Members.AddAsync(member);
-                await _unitOfWork.SaveChangesAsync();
+                await _memberService.CreateAsync(memberDto);
+                
                 await _unitOfWork.CommitAsync();
 
                 return Ok(new { message = "Member Registered Successfully" });

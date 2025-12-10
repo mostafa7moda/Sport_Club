@@ -7,6 +7,9 @@ namespace Sport_Club.Interfaces
     {
         ITrainerRepository Trainers { get; }
         IMemberRepository Members { get; }
+        ISectionRepository Sections { get; }
+        ISubscriptionRepository Subscriptions { get; }
+        IAttendanceRepository Attendances { get; }
 
         Task BeginTransactionAsync();
         Task CommitAsync();

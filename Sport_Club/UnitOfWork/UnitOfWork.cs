@@ -10,12 +10,18 @@ public class UnitOfWork : IUnitOfWork
     private IDbContextTransaction _transaction;
     public ITrainerRepository Trainers { get; }
     public IMemberRepository Members { get; }
+    public ISectionRepository Sections { get; }
+    public ISubscriptionRepository Subscriptions { get; }
+    public IAttendanceRepository Attendances { get; }
 
-    public UnitOfWork(AppDbContext context, ITrainerRepository trainerRepo, IMemberRepository memberRepo)
+    public UnitOfWork(AppDbContext context, ITrainerRepository trainerRepo, IMemberRepository memberRepo, ISectionRepository sectionRepo, ISubscriptionRepository subscriptionRepo, IAttendanceRepository attendanceRepo)
     {
         _context = context;
         Trainers = trainerRepo;
         Members = memberRepo;
+        Sections = sectionRepo;
+        Subscriptions = subscriptionRepo;
+        Attendances = attendanceRepo;
     }
 
     public async Task BeginTransactionAsync()
